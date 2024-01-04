@@ -20,6 +20,7 @@ func (app *application) showMovieHandler(w http.ResponseWriter, r *http.Request)
 		ID:        id,
 		CreatedAt: time.Now(),
 		Title:     "Test",
+		Year:      2021,
 		Runtime:   100,
 		Genres:    []string{"test", "test2"},
 		Version:   1,
