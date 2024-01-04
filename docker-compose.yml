@@ -20,6 +20,3 @@ services:
       - "5050:${PGADMIN_PORT}"
     depends_on:
       - postgres
-
-volumes:
-  pgdata:

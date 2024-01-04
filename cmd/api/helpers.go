@@ -6,11 +6,32 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/joho/godotenv"
 )
+
+func parseConfig() (config, error) {
+	var cfg config
+
+	err := godotenv.Load(".env")
+	if err != nil {
+		return cfg, err
+	}
+
+	cfg.port = 4000
+	cfg.env = "development"
+	cfg.db.dsn = os.Getenv("DATABASE_URL")
+	cfg.db.maxOpenConns = 25
+	cfg.db.maxIdleConns = 25
+	cfg.db.maxIdleTime = 15 * time.Minute
+
+	return cfg, nil
+}
 
 func (app *application) readIDParam(r *http.Request) (int64, error) {
 	strID := chi.URLParamFromCtx(r.Context(), "id")

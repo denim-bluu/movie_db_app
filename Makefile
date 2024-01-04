@@ -1,22 +1,53 @@
 include .env
 
+DOCKER_EXEC := docker exec -it
+DB_URL := "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable"
+MIGRATE_CMD := migrate -path db/migrations -database ${DB_URL}
+
+## start: Start PostgreSQL container
 postgres:
 	docker run --name ${DOCKER_IMAGE_NAME} -p ${POSTGRES_PORT}:${POSTGRES_PORT} -e POSTGRES_USER=${POSTGRES_USER} -e POSTGRES_PASSWORD=${POSTGRES_PASSWORD} -d postgres:${POSTGRES_VERSION}
+
+## createdb: Create PostgreSQL database
 createdb:
-	docker exec -it ${POSTGRES_CONTAINER_NAME} createdb --username=${POSTGRES_USER} --owner=${POSTGRES_USER} ${POSTGRES_DB}
+	$(DOCKER_EXEC) ${POSTGRES_CONTAINER_NAME} createdb --username=${POSTGRES_USER} --owner=${POSTGRES_USER} ${POSTGRES_DB}
+
+## psql: Access psql shell
 psql:
-	docker exec -it ${POSTGRES_CONTAINER_NAME} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB}
+	$(DOCKER_EXEC) ${POSTGRES_CONTAINER_NAME} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB}
+
+## dropdb: Drop PostgreSQL database
 dropdb:
-	docker exec -it ${POSTGRES_CONTAINER_NAME} dropdb ${POSTGRES_DB}
+	$(DOCKER_EXEC) ${POSTGRES_CONTAINER_NAME} dropdb --username=${POSTGRES_USER} ${POSTGRES_DB}
+
+## migrateup: Apply database migrations
 migrateup:
-	migrate -path db/migrations -database "${DATABASE_URL}" -verbose up
+	$(MIGRATE_CMD) up
+
+## migratedown: Rollback database migrations
 migratedown:
-	migrate -path db/migrations -database "${DATABASE_URL}" -verbose down
+	$(MIGRATE_CMD) down
+
+## test: Run tests
 test:
 	go test -v -cover ./...
-docker_compose_up:
+
+## up: Start Docker Compose services
+up:
 	docker-compose up -d
-docker_compose_down:
+
+## down: Stop Docker Compose services
+down:
 	docker-compose down
 
-.PHONY: postgres createdb dropdb migrateup migratedown sqlc test psql docker_compose_up docker_compose_down 
+## init: Start PostgreSQL container, create database and apply migrations
+init: up migrateup
+
+## downclean: Take down services and clean database
+downclean: migratedown dropdb down 
+
+## help: Show this help.
+help: Makefile
+	@sed -n 's/^##//p' $<
+
+.PHONY: postgres createdb dropdb migrateup migratedown test psql up down init downclean help
