@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"sort"
 
 	"github.com/denim-bluu/movie-db-app/internal/data"
 	"github.com/denim-bluu/movie-db-app/internal/validator"
@@ -93,8 +94,8 @@ func (app *application) updateMovieHandler(w http.ResponseWriter, r *http.Reques
 	movie, err := app.models.Movies.Get(id)
 	if err != nil {
 		switch {
-		case errors.Is(err, data.ErrRecordNotFound):
-			app.notFoundResponse(w, r)
+		case errors.Is(err, data.ErrEditConflict):
+			app.ErrEditConflictResponse(w, r)
 		default:
 			app.serverErrorResponse(w, r, err)
 		}
@@ -173,4 +174,13 @@ func (app *application) deleteMovieHandler(w http.ResponseWriter, r *http.Reques
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
+}
+
+func lengthOfLIS(nums []int) []int {
+	// var maxSeq int
+
+	return sort.Ints(nums)
+	// for i, n := range nums {
+
+	// }
 }
