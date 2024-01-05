@@ -13,7 +13,7 @@ type Models struct {
 	Movies MovieModel
 }
 
-func NwewModels(db *sql.DB) *Models {
+func NewModels(db *sql.DB) *Models {
 	return &Models{
 		Movies: MovieModel{DB: db},
 	}
