@@ -140,14 +140,32 @@ func (app *application) updateMovieHandler(w http.ResponseWriter, r *http.Reques
 	}
 }
 
-// func (app *application) deleteMovieHandler(w http.ResponseWriter, r *http.Request) {
-// 	var input struct {
-// 		ID int `json:"id"`
-// 	}
+func (app *application) deleteMovieHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := app.readIDParam(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
+		return
+	}
 
-// 	err := app.readJSON(w, r, &input)
-// 	if err != nil {
-// 		app.badRequestResponse(w, r, err)
-// 		return
-// 	}
-// }
+	movie, err := app.models.Movies.Get(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	err = app.models.Movies.Delete(movie.ID)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	err = app.writeJSON(w, envelope{"message": "movie successfully deleted"}, http.StatusOK, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+}
