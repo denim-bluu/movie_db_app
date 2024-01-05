@@ -8,4 +8,5 @@ CREATE TABLE IF NOT EXISTS movies (
     version INTEGER NOT NULL DEFAULT 1
 );
 
-CREATE INDEX idx_movies_created ON movies(created_at);
+CREATE INDEX IF NOT EXISTS movies_title_idx ON movies USING GIN (to_tsvector('simple', title));
+CREATE INDEX IF NOT EXISTS movies_genres_idx ON movies USING GIN (genres);
