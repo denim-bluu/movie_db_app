@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"sort"
 
 	"github.com/denim-bluu/movie-db-app/internal/data"
 	"github.com/denim-bluu/movie-db-app/internal/validator"
@@ -174,13 +173,4 @@ func (app *application) deleteMovieHandler(w http.ResponseWriter, r *http.Reques
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
-}
-
-func lengthOfLIS(nums []int) []int {
-	// var maxSeq int
-
-	return sort.Ints(nums)
-	// for i, n := range nums {
-
-	// }
 }
