@@ -18,5 +18,6 @@ func (app *application) newRouter() *chi.Mux {
 	router.Get("/v1/movies/{id}", app.showMovieHandler)
 	router.Patch("/v1/movies/{id}", app.updateMovieHandler)
 	router.Delete("/v1/movies/{id}", app.deleteMovieHandler)
+	router.Get("/v1/movies", app.listMoviesHandler)
 	return router
 }
