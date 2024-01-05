@@ -12,7 +12,7 @@ func (app *application) healthcheckHandler(w http.ResponseWriter, r *http.Reques
 			"version":     version,
 		},
 	}
-	err := app.writeJSON(w, env, http.StatusOK)
+	err := app.writeJSON(w, env, http.StatusOK, nil)
 	if err != nil {
 		app.badRequestResponse(w, r, err)
 		return
