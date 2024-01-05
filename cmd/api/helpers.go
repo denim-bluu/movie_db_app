@@ -46,10 +46,14 @@ func (app *application) readIDParam(r *http.Request) (int64, error) {
 
 type envelope map[string]any
 
-func (app *application) writeJSON(w http.ResponseWriter, data envelope, status int) error {
+func (app *application) writeJSON(w http.ResponseWriter, data envelope, status int, headers http.Header) error {
 	js, err := json.MarshalIndent(data, "", "\t")
 	if err != nil {
 		return err
+	}
+
+	for key, value := range headers {
+		w.Header()[key] = value
 	}
 
 	w.Header().Set("Content-Type", "application/json")
