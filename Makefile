@@ -8,9 +8,10 @@ MIGRATE_CMD := migrate -path db/migrations -database ${DB_URL}
 postgres:
 	docker run --name ${DOCKER_IMAGE_NAME} -p ${POSTGRES_PORT}:${POSTGRES_PORT} -e POSTGRES_USER=${POSTGRES_USER} -e POSTGRES_PASSWORD=${POSTGRES_PASSWORD} -d postgres:${POSTGRES_VERSION}
 
-## createdb: Create PostgreSQL database
+## createdb: Create PostgreSQL database and enable citext extension
 createdb:
 	$(DOCKER_EXEC) ${POSTGRES_CONTAINER_NAME} createdb --username=${POSTGRES_USER} --owner=${POSTGRES_USER} ${POSTGRES_DB}
+	$(DOCKER_EXEC) ${POSTGRES_CONTAINER_NAME} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} -c "CREATE EXTENSION IF NOT EXISTS citext;"
 
 ## psql: Access psql shell
 psql:
