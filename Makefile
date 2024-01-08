@@ -25,8 +25,18 @@ dropdb:
 migrateup:
 	$(MIGRATE_CMD) up
 
+## migrateup: Apply database migrations (force) & with parameters
+migrateupf:
+	$(MIGRATE_CMD) force ${VERSION}
+	$(MIGRATE_CMD) up
+
 ## migratedown: Rollback database migrations
 migratedown:
+	$(MIGRATE_CMD) down
+
+## migratedown: Rollback database migrations (force) & with parameters
+migratedownf:
+	$(MIGRATE_CMD) force ${VERSION}
 	$(MIGRATE_CMD) down
 
 ## test: Run tests

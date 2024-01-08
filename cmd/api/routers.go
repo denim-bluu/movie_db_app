@@ -22,5 +22,6 @@ func (app *application) newRouter() *chi.Mux {
 	router.Delete("/v1/movies/{id}", app.deleteMovieHandler)
 	router.Get("/v1/movies", app.listMoviesHandler)
 	router.Post("/v1/users", app.registerUserHandler)
+	router.Put("/v1/users/activate", app.ActivateUserHandler)
 	return router
 }
