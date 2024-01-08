@@ -38,6 +38,12 @@ func parseConfig() (config, error) {
 	flag.IntVar(&cfg.limiter.burst, "limiter-burst", 4, "Rate limiter maximum burst")
 	flag.BoolVar(&cfg.limiter.enabled, "limiter-enabled", true, "Enable rate limiter")
 
+	flag.StringVar(&cfg.Smtp.Host, "smtp-host", "sandbox.smtp.mailtrap.io", "SMTP host")
+	flag.IntVar(&cfg.Smtp.Port, "smtp-port", 25, "SMTP port")
+	flag.StringVar(&cfg.Smtp.Username, "smtp-username", "85c781087ec93b", "SMTP username")
+	flag.StringVar(&cfg.Smtp.Password, "smtp-password", "f08496f1f71999", "SMTP password")
+	flag.StringVar(&cfg.Smtp.Sender, "smtp-sender", "Migo/Joon <no-reply@migo-jipsa.com>", "SMTP sender")
+
 	flag.Parse()
 
 	return cfg, nil
@@ -156,4 +162,17 @@ func (app *application) readInt(qs url.Values, key string, defaultValue int, v *
 	}
 
 	return i
+}
+
+func (app *application) background(fn func()) {
+	app.wg.Add(1)
+	go func() {
+		defer app.wg.Done()
+		defer func() {
+			if err := recover(); err != nil {
+				app.logger.Error(fmt.Sprintf("%v", err))
+			}
+		}()
+		fn()
+	}()
 }

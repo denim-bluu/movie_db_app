@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/denim-bluu/movie-db-app/internal/data"
+	"github.com/denim-bluu/movie-db-app/internal/mailer"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/lib/pq"
 )
@@ -29,12 +31,15 @@ type config struct {
 		burst   int
 		enabled bool
 	}
+	Smtp mailer.Smtp
 }
 
 type application struct {
 	config config
 	logger *slog.Logger
 	models *data.Models
+	mailer *mailer.Mailer
+	wg     sync.WaitGroup
 }
 
 func main() {
@@ -59,6 +64,7 @@ func main() {
 		config: cfg,
 		logger: logger,
 		models: data.NewModels(db),
+		mailer: mailer.New(cfg.Smtp),
 	}
 
 	err = app.serve()

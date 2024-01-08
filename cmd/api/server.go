@@ -31,6 +31,9 @@ func (app *application) handleShutdown(srv *http.Server, shutdownError chan erro
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
+
+	app.logger.Info("completing background tasks", "addr", srv.Addr)
+	app.wg.Wait()
 	shutdownError <- srv.Shutdown(ctx)
 }
 
