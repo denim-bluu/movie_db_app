@@ -11,16 +11,21 @@ import (
 	"github.com/denim-bluu/movie-db-app/internal/validator"
 )
 
+const (
+	ScopeActivation     = "activation"
+	ScopeAuthentication = "authentication"
+)
+
 type TokenModel struct {
 	DB *sql.DB
 }
 
 type Token struct {
-	Plaintext string
-	Hash      []byte
-	UserID    int64
-	Expiry    time.Time
-	Scope     string
+	Plaintext string    `json:"token"`
+	Hash      []byte    `json:"-"`
+	UserID    int64     `json:"-"`
+	Expiry    time.Time `json:"expiry"`
+	Scope     string    `json:"-"`
 }
 
 func generateToken(userID int64, duration time.Duration, scope string) (*Token, error) {
