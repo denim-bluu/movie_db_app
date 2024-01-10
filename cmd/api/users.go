@@ -35,7 +35,6 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	v := validator.New()
-
 	if data.ValidateUser(v, user); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
 		return
@@ -50,6 +49,12 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		default:
 			app.serverErrorResponse(w, r, err)
 		}
+		return
+	}
+
+	err = app.models.Permissions.AddForUser(user.ID, "movies:read")
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
 		return
 	}
 

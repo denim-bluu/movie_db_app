@@ -54,8 +54,11 @@ up:
 down:
 	docker-compose down
 
+wait:
+	sleep 5
+
 ## init: Start PostgreSQL container, create database and apply migrations
-init: up addcitext migrateup
+init: up wait addcitext migrateup
 
 ## downclean: Take down services and clean database
 downclean: migratedown dropdb down 

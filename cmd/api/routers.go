@@ -20,12 +20,18 @@ func (app *application) newRouter() *chi.Mux {
 
 	// Require authentication
 	r.Group(func(r chi.Router) {
-		r.Use(app.requireActivatedUser)
-		r.Post("/v1/movies", app.createMovieHandler)
+		r.Use(app.requireReadPermission)
 		r.Get("/v1/movies/{id}", app.showMovieHandler)
+		r.Get("/v1/movies", app.listMoviesHandler)
+		r.Post("/v1/movies", app.createMovieHandler)
 		r.Patch("/v1/movies/{id}", app.updateMovieHandler)
 		r.Delete("/v1/movies/{id}", app.deleteMovieHandler)
-		r.Get("/v1/movies", app.listMoviesHandler)
+	})
+	r.Group(func(r chi.Router) {
+		r.Use(app.requireWritePermission)
+		r.Post("/v1/movies", app.createMovieHandler)
+		r.Patch("/v1/movies/{id}", app.updateMovieHandler)
+		r.Delete("/v1/movies/{id}", app.deleteMovieHandler)
 	})
 
 	r.Group(func(r chi.Router) {
