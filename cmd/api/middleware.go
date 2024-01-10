@@ -151,3 +151,32 @@ func (app *application) requireActivatedUser(next http.Handler) http.Handler {
 	})
 	return app.requireAuthenticateddUser(fn)
 }
+
+// requireReadPermission middleware requires read permission for the user
+func (app *application) requireReadPermission(next http.Handler) http.Handler {
+	return app.requirePermission(next, "movies:read")
+}
+
+// requireWritePermission middleware requires write permission for the user
+func (app *application) requireWritePermission(next http.Handler) http.Handler {
+	return app.requirePermission(next, "movies:write")
+}
+
+// requirePermission is a helper function to check if the user has the required permission
+func (app *application) requirePermission(next http.Handler, permission string) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		user := app.contextGetUser(r)
+		permissions, err := app.models.Permissions.GetAllForUser(user.ID)
+		if err != nil {
+			app.serverErrorResponse(w, r, err)
+			return
+		}
+
+		if !permissions.Include(permission) {
+			app.notPermittedResponse(w, r)
+			return
+		}
+		next.ServeHTTP(w, r)
+	}
+	return app.requireActivatedUser(http.HandlerFunc(fn))
+}
