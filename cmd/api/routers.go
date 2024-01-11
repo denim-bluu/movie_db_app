@@ -17,6 +17,7 @@ func (app *application) newRouter() *chi.Mux {
 	r.Use(app.recoverPanic)
 	r.Use(app.authenticate)
 	r.Use(app.rateLimit)
+	r.Use(app.enableCORS)
 
 	// Require authentication
 	r.Group(func(r chi.Router) {

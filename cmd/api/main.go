@@ -32,6 +32,9 @@ type config struct {
 		enabled bool
 	}
 	Smtp mailer.Smtp
+	cors struct {
+		trustedOrigins []string
+	}
 }
 
 type application struct {

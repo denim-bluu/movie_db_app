@@ -43,6 +43,10 @@ func parseConfig() (config, error) {
 	flag.StringVar(&cfg.Smtp.Username, "smtp-username", "85c781087ec93b", "SMTP username")
 	flag.StringVar(&cfg.Smtp.Password, "smtp-password", "f08496f1f71999", "SMTP password")
 	flag.StringVar(&cfg.Smtp.Sender, "smtp-sender", "Migo/Joon <no-reply@migo-jipsa.com>", "SMTP sender")
+	flag.Func("cors-trusted-origins", "Trusted CORS origins (space separated)", func(val string) error {
+		cfg.cors.trustedOrigins = strings.Fields(val)
+		return nil
+	})
 
 	flag.Parse()
 
