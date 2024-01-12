@@ -1,9 +1,6 @@
 package main
 
 import (
-	"context"
-	"database/sql"
-	"fmt"
 	"log/slog"
 	"os"
 	"sync"
@@ -46,54 +43,19 @@ type application struct {
 }
 
 func main() {
-
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+
 	cfg, err := parseConfig()
-	if err != nil {
-		logger.Error(err.Error())
-		os.Exit(1)
-	}
+	handleError(err, logger)
 
 	db, err := openDB(cfg)
-	if err != nil {
-		logger.Error(err.Error())
-		os.Exit(1)
-	}
+	handleError(err, logger)
 	defer db.Close()
-	logger.Info("database connection pool established")
-	logger.Info(fmt.Sprintf("Postgres SQL DSN: %s", cfg.db.dsn))
 
-	app := &application{
-		config: cfg,
-		logger: logger,
-		models: data.NewModels(db),
-		mailer: mailer.New(cfg.Smtp),
-	}
+	InitExpvar(db)
+
+	app := createApplication(cfg, logger, db)
 
 	err = app.serve()
-	if err != nil {
-		logger.Error(err.Error())
-		os.Exit(1)
-	}
-}
-
-func openDB(cfg config) (*sql.DB, error) {
-	db, err := sql.Open("postgres", cfg.db.dsn)
-	if err != nil {
-		return nil, err
-	}
-	db.SetMaxOpenConns(cfg.db.maxOpenConns)
-	db.SetMaxIdleConns(cfg.db.maxIdleConns)
-	db.SetConnMaxIdleTime(cfg.db.maxIdleTime)
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	err = db.PingContext(ctx)
-	if err != nil {
-		db.Close()
-		return nil, err
-	}
-
-	return db, nil
+	handleError(err, logger)
 }

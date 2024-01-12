@@ -1,22 +1,59 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
+	"expvar"
 	"flag"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/denim-bluu/movie-db-app/internal/data"
+	"github.com/denim-bluu/movie-db-app/internal/mailer"
 	"github.com/denim-bluu/movie-db-app/internal/validator"
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 )
+
+func InitExpvar(db *sql.DB) {
+	expvar.NewString("version").Set(version)
+	expvar.Publish("goroutines", expvar.Func(func() interface{} {
+		return runtime.NumGoroutine()
+	}))
+	expvar.Publish("database", expvar.Func(func() interface{} {
+		return db.Stats()
+	}))
+	expvar.Publish("timestamp", expvar.Func(func() interface{} {
+		return time.Now().Unix()
+	}))
+}
+
+// createApplication creates a new application instance
+func createApplication(cfg config, logger *slog.Logger, db *sql.DB) *application {
+	return &application{
+		config: cfg,
+		logger: logger,
+		models: data.NewModels(db),
+		mailer: mailer.New(cfg.Smtp),
+	}
+}
+
+// handleError handles errors and exits if an error is present
+func handleError(err error, logger *slog.Logger) {
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+}
 
 func parseConfig() (config, error) {
 	var cfg config
