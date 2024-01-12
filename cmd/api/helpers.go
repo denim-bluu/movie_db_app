@@ -20,8 +20,13 @@ import (
 	"github.com/denim-bluu/movie-db-app/internal/data"
 	"github.com/denim-bluu/movie-db-app/internal/mailer"
 	"github.com/denim-bluu/movie-db-app/internal/validator"
+	"github.com/denim-bluu/movie-db-app/internal/vcs"
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
+)
+
+var (
+	version = vcs.Version()
 )
 
 func InitExpvar(db *sql.DB) {
@@ -84,9 +89,14 @@ func parseConfig() (config, error) {
 		cfg.cors.trustedOrigins = strings.Fields(val)
 		return nil
 	})
+	displayVersion := flag.Bool("version", false, "Display version and exit")
 
 	flag.Parse()
 
+	if *displayVersion {
+		fmt.Printf("Version:\t%s\n", version)
+		os.Exit(0)
+	}
 	return cfg, nil
 }
 
