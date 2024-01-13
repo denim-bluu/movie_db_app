@@ -22,7 +22,6 @@ import (
 	"github.com/denim-bluu/movie-db-app/internal/validator"
 	"github.com/denim-bluu/movie-db-app/internal/vcs"
 	"github.com/go-chi/chi/v5"
-	"github.com/joho/godotenv"
 )
 
 var (
@@ -62,11 +61,6 @@ func handleError(err error, logger *slog.Logger) {
 
 func parseConfig() (config, error) {
 	var cfg config
-
-	err := godotenv.Load(".env")
-	if err != nil {
-		return cfg, err
-	}
 
 	flag.IntVar(&cfg.port, "port", 4000, "API server port")
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
