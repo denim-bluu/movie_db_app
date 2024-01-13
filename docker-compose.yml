@@ -1,22 +1,44 @@
 version: "3.8"
 services:
-  postgres:
-    container_name: ${POSTGRES_CONTAINER_NAME}
+  pg-db:
     image: postgres:${POSTGRES_VERSION}
+    restart: always
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "${POSTGRES_PORT}:5432"
+      - 5432:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
-  pgadmin:
-    container_name: ${PGADMIN_CONTAINER_NAME}
-    image: dpage/${PGADMIN_VERSION}
+  migrations:
+    build:
+      context: .
+      dockerfile: Dockerfile.migrations
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
-    ports:
-      - "5050:${PGADMIN_PORT}"
+      DB_URL: ${DB_URL}
     depends_on:
-      - postgres
+      pg-db:
+        condition: service_healthy
+    restart: on-failure
+
+  web-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.webapp
+    ports:
+      - 4000:4000
+    environment:
+      DB_URL: ${DB_URL}
+    depends_on:
+      - migrations
+    command: ["./main"]
+
+volumes:
+  postgres_data:

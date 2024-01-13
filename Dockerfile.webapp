@@ -1,0 +1,35 @@
+# Start from the latest golang base image
+FROM golang:1.21-bullseye AS builder
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy go.mod and go.sum files
+COPY go.mod go.sum ./
+
+# Download all dependencies
+RUN go mod download
+
+# Copy the rest of the source code
+COPY . .
+
+# Build the application
+RUN go build -o main ./cmd/api
+
+# Start a new stage from scratch
+FROM debian:bullseye-slim
+
+# Add ca-certificates for secure connections
+RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+
+# Set the working directory inside the container
+WORKDIR /root/
+
+# Copy the pre-built binary from the previous stage
+COPY --from=builder /app/main .
+
+# Copy the .env file
+COPY --from=builder /app/.env .env
+
+# Command to run the binary
+CMD ["./main"]
