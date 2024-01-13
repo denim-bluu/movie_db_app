@@ -1,14 +1,23 @@
-FROM golang:1.21-bullseye
+# Start from the latest golang base image
+FROM golang:1.21-bullseye as builder
+
+# Set the Current Working Directory inside the container
+WORKDIR /app
+
+# Install migrate tool
+RUN go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+
+# Start a new stage from scratch
+FROM debian:bullseye-slim
+
+# Set the Current Working Directory inside the container
 WORKDIR /migrations
 
 # Copy migration files
 COPY db/migrations /migrations
 
-# Copy the wait-for-it script
-COPY wait-for-it.sh /wait-for-it.sh
-RUN chmod +x /wait-for-it.sh
+# Copy the migrate tool from the builder stage
+COPY --from=builder /go/bin/migrate /usr/local/bin/migrate
 
-# Install migrate tool
-RUN go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
-
-CMD /wait-for-it.sh postgresdb:5432 -- sh -c 'migrate -path=/migrations -database ${DATABASE_URL} up'
+# Command to run the migrations
+CMD migrate -path=/migrations -database ${DB_URL} up
