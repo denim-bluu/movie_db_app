@@ -1,6 +1,6 @@
 version: "3.8"
 services:
-  postgres:
+  postgresdb:
     container_name: ${POSTGRES_CONTAINER_NAME}
     image: postgres:${POSTGRES_VERSION}
     environment:
@@ -9,14 +9,20 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "${POSTGRES_PORT}:5432"
-
-  pgadmin:
-    container_name: ${PGADMIN_CONTAINER_NAME}
-    image: dpage/${PGADMIN_VERSION}
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
-    ports:
-      - "5050:${PGADMIN_PORT}"
-    depends_on:
-      - postgres
+  migrations:
+      build:
+        context: .
+        dockerfile: Dockerfile.migrations
+      environment:
+        DATABASE_URL: ${DATABASE_URL}
+      depends_on:
+        - postgresdb
+  webapp:
+      build: .
+      ports:
+        - "4000:4000"
+      environment:
+        DATABASE_URL: ${DATABASE_URL}
+      depends_on:
+        - migrations
+      command: ["/wait-for-it.sh", "postgresdb:5432", "--", "./main"]

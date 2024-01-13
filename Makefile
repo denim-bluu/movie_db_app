@@ -1,8 +1,7 @@
 include .env
 
 DOCKER_EXEC := docker exec -it
-DB_URL := "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable"
-MIGRATE_CMD := migrate -path db/migrations -database ${DB_URL}
+MIGRATE_CMD := migrate -path db/migrations -database ${DATABASE_URL}
 
 # ==================================================================================== #
 # HELPERS
@@ -113,7 +112,7 @@ setup/teardown: confirm db/migration/down db/drop docker/down ## Take down servi
 # ==================================================================================== #
 
 .PHONY: build/api
-build/api: ## build/api: build the cmd/api application
-    @echo 'Building cmd/api...'
-    go build -ldflags='-s -w -X main.version=${VERSION}' -o=./bin/api ./cmd/api
-    GOOS=linux GOARCH=amd64 go build -ldflags='-s -w -X main.version=${VERSION}' -o=./bin/linux_amd64/api ./cmd/api
+build/api:  ## build/api: build the cmd/api application
+	@echo 'Building cmd/api...'
+	go build -ldflags='-s -w' -o=./bin/api ./cmd/api
+	GOOS=linux GOARCH=amd64 go build -ldflags='-s -w' -o=./bin/linux_amd64/api ./cmd/api
