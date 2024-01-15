@@ -10,6 +10,24 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+
+    # Service containers to run with `container-job`
+    services:
+      postgres:
+        # Docker Hub image
+        image: postgres15-alpine
+        # Provide the password for postgres
+        env:
+          POSTGRES_USER: movie
+          POSTGRES_DB: movie
+          POSTGRES_PASSWORD: 950919
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
 
     - name: Set up Go
@@ -19,6 +37,9 @@ jobs:
 
     - name: Check out code into the Go module directory
       uses: actions/checkout@v3
+
+    - name: Run migrations
+      run: make db/migration/up
     
     - name: Build
       run: go build -v ./...
