@@ -22,8 +22,8 @@ services:
 
   migrations:
     build:
+      dockerfile: ./docker/db/Dockerfile
       context: .
-      dockerfile: Dockerfile.migrations
     environment:
       DB_URL: ${DB_URL}
     depends_on:
@@ -35,8 +35,8 @@ services:
 
   web-app:
     build:
+      dockerfile: ./docker/db/Dockerfile
       context: .
-      dockerfile: Dockerfile.webapp
     ports:
       - "4000:4000"
     environment:
