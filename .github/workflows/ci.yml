@@ -19,7 +19,7 @@ jobs:
         env:
           POSTGRES_USER: movie
           POSTGRES_DB: movie
-          POSTGRES_PASSWORD: 950919
+          POSTGRES_PASSWORD: secret
         ports:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
