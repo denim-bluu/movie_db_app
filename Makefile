@@ -3,7 +3,7 @@ include .env
 PRODUCTION_HOST = '167.99.142.46'
 DOCKER_EXEC := docker exec -it
 MIGRATE_CMD := migrate -path db/migrations -database ${DB_URL}
-DB_URL=postgresql://$movie:$secret@pg-db:5432/$movie?sslmode=disable
+DB_URL=postgresql://$movie:$secret@localhost:5432/$movie?sslmode=disable
 
 # ==================================================================================== #
 # HELPERS
